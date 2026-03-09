@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>动态视觉 | 交互作品集</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        :root {
+            --primary: #6C5CE7;
+            --dark: #2D3436;
+            --light: #F8F9FA;
+            --gray: #636E72;
+        }
+
+        body {
+            background-color: var(--dark);
+            color: var(--light);
+            overflow-x: hidden;
+        }
+
+        /* 导航 */
+        header {
+            position: fixed;
+            width: 100%;
+            padding: 2rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .header-scrolled {
+            background-color: rgba(45, 52, 54, 0.95);
+            padding: 1rem 5%;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .brand {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .menu-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 101;
+        }
+
+        /* 侧边导航 */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 0;
+            height: 100vh;
+            background-color: var(--primary);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 3rem;
+            transition: width 0.5s ease;
+            z-index: 100;
+            overflow: hidden;
+        }
+
+        .sidebar.open {
+            width: 100%;
+            max-width: 350px;
+        }
+
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.5rem;
+            font-weight: 600;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+
+        .sidebar.open a {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 英雄区 */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            text-align: center;
+            z-index: 2;
+            padding: 0 5%;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(90deg, #6C5CE7, #A29BFE);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 2rem;
+            color: var(--gray);
+        }
+
+        .cta-btn {
+            display: inline-block;
+            padding: 1rem 2.5rem;
+            background-color: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(108, 92, 231, 0.3);
+        }
+
+        /* 作品区 */
+        .portfolio {
+            padding: 8rem 5%;
+        }
+
+        .section-header {
+            margin-bottom: 5rem;
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .section-header p {
+            color: var(--gray);
+            max-width: 600px;
+        }
+
+        .work-container {
+            display: flex;
+            flex-direction: column;
+            gap: 5rem;
+        }
+
+        .work-card {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s ease;
+        }
+
+        .work-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .work-card:nth-child(even) {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .work-card:nth-child(even) .work-img {
+            order: 2;
+        }
+
+        .work-img {
+            width: 100%;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .work-img img {
+            width: 100%;
+            display: block;
+            transition: transform 0.5s ease;
+        }
+
+        .work-card:hover .work-img img {
+            transform: scale(1.03);
+        }
+
+        .work-details h3 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .work-details .category {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1.5rem;
+            color: var(--gray);
+        }
+
+        .work-details p {
+            margin-bottom: 2rem;
+            line-height: 1.8;
+            color: var(--light);
+        }
+
+        .work-link {
+            display: inline-block;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            position: relative;
+        }
+
+        .work-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background-color: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .work-link:hover::after {
+            width: 100%;
+        }
+
+        /* 技能区 */
+        .skills {
+            padding: 8rem 5%;
+            background-color: #24292b;
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .skill-item {
+            padding: 2rem;
+            background-color: var(--dark);
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .skill-item h3 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .skill-item p {
+            color: var(--gray);
+            font-size: 0.95rem;
+        }
+
+        /* 联系区 */
+        .contact {
+            padding: 8rem 5%;
+            text-align: center;
+        }
+
+        .contact h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .contact p {
+            color: var(--gray);
+            max-width: 600px;
+            margin: 0 auto 3rem;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .social-links a {
+            color: white;
+            font-size: 1.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .social-links a:hover {
+            color: var(--primary);
+        }
+
+        /* 页脚 */
+        footer {
+            padding: 3rem 5%;
+            text-align: center;
+            border-top: 1px solid #333;
+            color: var(--gray);
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.8rem;
+            }
+
+            .work-card,
+            .work-card:nth-child(even) {
+                grid-template-columns: 1fr;
+            }
+
+            .work-card:nth-child(even) .work-img {
+                order: 0;
+            }
+
+            .section-header h2,
+            .contact h2 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+    <!-- 引入谷歌字体和图标 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- 导航 -->
+    <header id="main-header">
+        <a href="#" class="brand">DYNAMIC ART</a>
+        <button class="menu-btn" id="menu-btn">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <!-- 侧边导航 -->
+    <div class="sidebar" id="sidebar">
+        <a href="#home">首页</a>
+        <a href="#portfolio">作品集</a>
+        <a href="#skills">技能</a>
+        <a href="#contact">联系</a>
+    </div>
+
+    <!-- 英雄区 -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1>动态视觉<br>交互体验设计</h1>
+            <p>融合创意与技术，打造沉浸式的数字视觉体验，让设计不止于视觉，更在于交互</p>
+            <a href="#portfolio" class="cta-btn">查看作品集</a>
+        </div>
+    </section>
+
+    <!-- 作品展示 -->
+    <section id="portfolio" class="portfolio">
+        <div class="section-header">
+            <h2>精选作品</h2>
+            <p>每一个作品都融合了创意构思、视觉设计与交互体验，探索数字视觉的无限可能</p>
+        </div>
+        <div class="work-container">
+            <!-- 作品1 -->
+            <div class="work-card">
+                <div class="work-img">
+                    <img src="https://picsum.photos/id/1/800/600" alt="移动端UI设计">
+                </div>
+                <div class="work-details">
+                    <h3>健康管理APP</h3>
+                    <div class="category">UI/UX 设计</div>
+                    <p>为健康管理类应用打造的全套UI设计，注重用户体验与视觉美感的平衡，采用简约而富有层次的设计语言，提升用户使用体验。</p>
+                    <a href="#" class="work-link">查看详情 <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+
+            <!-- 作品2 -->
+            <div class="work-card">
+                <div class="work-img">
+                    <img src="https://picsum.photos/id/2/800/600" alt="网页设计">
+                </div>
+                <div class="work-details">
+                    <h3>品牌官网重构</h3>
+                    <div class="category">网页设计 | 交互</div>
+                    <p>为科技品牌重构官网体验，融入微交互与动态视觉效果，提升品牌形象的同时优化用户浏览体验，适配全终端设备。</p>
+                    <a href="#" class="work-link">查看详情 <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+
+            <!-- 作品3 -->
+            <div class="work-card">
+                <div class="work-img">
+                    <img src="https://picsum.photos/id/3/800/600" alt="动态视觉">
+                </div>
+                <div class="work-details">
+                    <h3>品牌动态视觉</h3>
+                    <div class="category">动态设计 | 视觉</div>
+                    <p>为消费品牌打造的动态视觉系统，包括LOGO动效、产品展示动画等，增强品牌识别度与视觉记忆点。</p>
+                    <a href="#" class="work-link">查看详情 <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 技能区 -->
+    <section id="skills" class="skills">
+        <div class="section-header">
+            <h2>我的技能</h2>
+            <p>融合多领域的设计能力，为项目提供全方位的视觉与交互解决方案</p>
+        </div>
+        <div class="skills-grid">
+            <div class="skill-item">
+                <h3>UI/UX 设计</h3>
+                <p>用户界面与体验设计，注重可用性与美感的平衡，打造直观且有吸引力的产品体验</p>
+            </div>
+            <div class="skill-item">
+                <h3>视觉设计</h3>
+                <p>品牌视觉、平面设计、插画创作，建立统一且有辨识度的视觉语言</p>
+            </div>
+            <div class="skill-item">
+                <h3>交互设计</h3>
+                <p>微交互、动效设计、用户流程优化，提升产品的交互体验与情感连接</p>
+            </div>
+            <div class="skill-item">
+                <h3>前端实现</h3>
+                <p>HTML/CSS/JS基础，能够将设计稿转化为可交互的网页原型</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 联系区 -->
+    <section id="contact" class="contact">
+        <h2>合作与交流</h2>
+        <p>无论你是有项目合作需求，还是单纯想交流设计心得，都欢迎随时联系我</p>
+        <a href="mailto:hello@dynamicart.com" class="cta-btn">发送邮件</a>
+        <div class="social-links">
+            <a href="#"><i class="fab fa-behance"></i></a>
+            <a href="#"><i class="fab fa-dribbble"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-linkedin"></i></a>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer>
+        <p>© 2024 DYNAMIC ART | 动态视觉作品集 版权所有</p>
+    </footer>
+
+    <script>
+        // 侧边菜单
+        const menuBtn = document.getElementById('menu-btn');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarLinks = sidebar.querySelectorAll('a');
+
+        menuBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+            menuBtn.innerHTML = sidebar.classList.contains('open') 
+                ? '<i class="fas fa-times"></i>' 
+                : '<i class="fas fa-bars"></i>';
+        });
+
+        sidebarLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                sidebar.classList.remove('open');
+                menuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+            });
+        });
+
+        // 导航栏滚动效果
+        const header = document.getElementById('main-header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                header.classList.add('header-scrolled');
+            } else {
+                header.classList.remove('header-scrolled');
+            }
+        });
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // 作品卡片滚动显示
+        const workCards = document.querySelectorAll('.work-card');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        workCards.forEach(card => {
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>
